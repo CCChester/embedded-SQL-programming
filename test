@@ -1,0 +1,117 @@
+-- Example commands for (re) creating the BIBLIOGRAPHY database
+-- NOTE: insert commands should be modified to create appropriate
+-- test data
+
+connect to cs348
+
+drop table author
+create table author ( \
+    aid         integer not null, \
+    name        char(22) not null, \
+    url         char(42), \
+    primary key (aid) )
+insert into author (aid, name) values (1, 'John Doe')
+insert into author (aid, name) values (4, 'Peter')
+insert into author (aid, name) values (3, 'Ken')
+insert into author (aid, name, url) \
+values (2, 'Ivan', 'http://db.uwaterloo.ca/~itbowman')
+
+drop table publication
+create table publication ( \
+    pubid       char(10) not null, \
+    title       char(70) not null, \
+    primary key (pubid) )
+insert into publication (pubid, title) \
+values ('kk11', 'A ')
+insert into publication (pubid, title) \
+values ('kk22', 'A e')
+insert into publication (pubid, title) \
+values ('kk32', 'A Coe')
+insert into publication (pubid, title) \
+values ('kk44', 'A Co')
+insert into publication (pubid, title) \
+values ('kk55', 'A Com1')
+insert into publication (pubid, title) \
+values ('AA01', 'A Com2')
+insert into publication (pubid, title) \
+values ('AA02', 'A Com3')
+insert into publication (pubid, title) \
+values ('QQ01', 'A Com4')
+insert into publication (pubid, title) \
+values ('CC01', 'A Com6')
+insert into publication (pubid, title) \
+values ('JJ01', 'A Com8')
+insert into publication (pubid, title) \
+values ('SIGMOD02', 'Proc. ACM SIGMOD Conference on Management of Data')
+insert into publication (pubid, title) \
+values ('GG01', 'A Compact B-Tree')
+
+drop table wrote
+create table wrote ( \
+    aid         integer not null, \
+    pubid       char(10) not null, \
+    aorder      integer not null, \
+    primary key (aid, pubid), \
+    foreign key (aid) references author (aid), \
+    foreign key (pubid) references publication (pubid) )
+
+insert into wrote (aid, pubid, aorder) values (1, 'kk11', 1)
+insert into wrote (aid, pubid, aorder) values (1, 'kk22', 1)
+insert into wrote (aid, pubid, aorder) values (1, 'kk32', 1)
+insert into wrote (aid, pubid, aorder) values (1, 'kk44', 1)
+insert into wrote (aid, pubid, aorder) values (1, 'kk55', 1)
+
+insert into wrote (aid, pubid, aorder) values (1, 'AA02', 1)
+insert into wrote (aid, pubid, aorder) values (4, 'AA02', 4)
+insert into wrote (aid, pubid, aorder) values (3, 'AA02', 3)
+
+insert into wrote (aid, pubid, aorder) values (1, 'AA01', 1)
+insert into wrote (aid, pubid, aorder) values (4, 'AA01', 4)
+insert into wrote (aid, pubid, aorder) values (1, 'QQ01', 1)
+insert into wrote (aid, pubid, aorder) values (2, 'QQ01', 2)
+insert into wrote (aid, pubid, aorder) values (1, 'GG01', 1)
+insert into wrote (aid, pubid, aorder) values (3, 'GG01', 3)
+
+insert into wrote (aid, pubid, aorder) values (3, 'CC01', 3)
+insert into wrote (aid, pubid, aorder) values (2, 'JJ01', 2)
+
+
+drop table proceedings
+create table proceedings ( \
+    pubid       char(10) not null, \
+    year        integer not null, \
+    primary key (pubid), \
+    foreign key (pubid) references publication (pubid) )
+
+insert into proceedings (pubid, year) values ('SIGMOD02', 2002)
+
+drop table journal
+create table journal ( \
+    pubid       char(10) not null, \
+    volume      integer not null, \
+    number      integer not null, \
+    year        integer not null, \
+    primary key (pubid), \
+    foreign key (pubid) references publication (pubid) )
+
+drop table book
+create table book ( \
+    pubid       char(10) not null, \
+    publisher   char(50) not null, \
+    year        integer not null, \
+    primary key (pubid), \
+    foreign key (pubid) references publication (pubid) )
+
+drop table article
+create table article ( \
+    pubid       char(10) not null, \
+    appearsin   char(10) not null, \
+    startpage   integer not null, \
+    endpage     integer not null, \
+    primary key (pubid), \
+    foreign key (pubid) references publication (pubid), \
+    foreign key (appearsin) references publication (pubid) )
+
+insert into article (pubid, appearsin, startpage, endpage) \
+values ('GG01', 'SIGMOD02', 533, 541)
+

@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "util.h"
+#include <string.h>
+EXEC SQL INCLUDE SQLCA; 
+int main(int argc, char *argv[]){
+   EXEC SQL BEGIN DECLARE SECTION;
+   char name[23];
+   sqlint32 a;
+   sqlint32 b;
+   sqlint32 myaid;
+   char db[6] = "cs348";
+   EXEC SQL END DECLARE SECTION;
+   printf("Sample C program: CONNECT\n");
+   EXEC SQL WHENEVER SQLERROR  GO TO error;
+   EXEC SQL CONNECT TO :db;
+   printf("Connected to DB2\n");
+   strcpy(name,argv[1]);
+   printf("%s ", name);
+   EXEC SQL SELECT aid INTO :myaid from author where name = :name;
+   printf("(aid:%d)\n",myaid);
+   EXEC SQL DECLARE cursor1 CURSOR FOR 
+             select count (*) as c1, numberOfAuthor from 
+             (SELECT pubid,count(*) as numberOfAuthor FROM wrote where pubid in 
+               (select pubid from wrote where aid=:myaid) group by pubid) 
+             group by numberOfAuthor;
+   EXEC SQL OPEN cursor1;
+   for (;;){
+     EXEC SQL FETCH cursor1 INTO :a, :b;
+     if(SQLCODE==100){
+      break;
+     }
+     if (SQLCODE<0){
+      break;
+     }
+     if(b == 1){
+      printf("%d:%d\n",a,b-1);
+     }
+     else{printf("%d:%d\n",a,b);}
+   };
+   EXEC SQL CLOSE cursor1;
+   EXEC SQL COMMIT;
+   EXEC SQL CONNECT reset;
+   exit(0);
+error:
+   check_error("My error",&sqlca);
+   EXEC SQL WHENEVER SQLERROR CONTINUE;
+   EXEC SQL ROLLBACK;
+   EXEC SQL CONNECT reset;
+   exit(1);
+}
